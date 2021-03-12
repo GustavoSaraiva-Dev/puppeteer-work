@@ -7,25 +7,45 @@ const pptr = async () => {
     headless: false,
   });
   const page = await browser.newPage();
-  await page.setViewport({ width: 800, height: 600 });
-  await page.goto("https://solfarma.topdesk.net/tas/secure/login/form");
+  await page.setViewport({ width: 1920, height: 1080 });
+  await page.authenticate({
+    username: config.user,
+    password: config.password,
+  });
+  await page.goto("http://192.168.30.36:8080/tfs/BitCall/DEV/_backlogs");
 
-  await page.type("#loginname", config.user, { delay: 3 });
-  await page.type("#password", config.password, { delay: 1 });
-  await page.click(".button#login");
-
-  await page.waitForTimeout(10000);
-
-  const frameHAndle = await page.$("iframe");
-  const iframe = await frameHAndle?.contentFrame();
-  console.log(iframe);
-
-  await iframe?.$eval(
-    `div [mtype="label"][mangoinfobox="Filtrar: não resolvido"]`,
-    (e) => e.classList
+  await page.waitForSelector(".add-panel-full-width-row-button");
+  await page.click(".add-panel-button");
+  await page.waitForSelector(
+    ".work-item-form.work-item-form-main.no-headertoolbar"
+  );
+  await page.click(
+    'span.menu-item-icon.bowtie-icon.bowtie-ellipsis[aria-label="Actions"]'
+  );
+  await page.hover('[class="menu sub-menu"] li[aria-posinset="5"]'); //Menu-Template
+  await page.waitForSelector(
+    '[class="toolbar workitem-tool-bar"] ul > li[aria-label="Actions"] > ul:nth-child(5) [aria-posinset="15"]' //carregando o menu de template
+  );
+  await page.click(
+    '[class="toolbar workitem-tool-bar"] ul > li[aria-label="Actions"] > ul:nth-child(5) [aria-posinset="15"]' //clicando no menu de template
   );
 
-  //await page.screenshot({ path: './src/download/example.png' });
+  await page.waitForTimeout(2000);
+  await page.click('[aria-label="Title Field"]', { clickCount: 3 });
+  await page.keyboard.press("Backspace");
+  await page.type('[aria-label="Title Field"]', "Essa é a descrição do item");
+
+  //criar a tag de automático para mim
+  await page.click(".bowtie-icon.bowtie-math-plus-light");
+  await page.type(".tags-input.tag-box.ui-autocomplete-input", "Automático");
+  await page.keyboard.press("Enter", { delay: 1000 });
+
+  const campoDescricao = await page.frames();
+  const textbox = await campoDescricao.find((ifr) => ifr.$('[role="textbox"]'));
+
+  await textbox?.click;
+
+  await page.screenshot({ path: "./src/download/example.png" });
 
   //await browser.close();
 };
