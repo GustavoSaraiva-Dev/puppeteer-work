@@ -3,4 +3,4 @@ src/download
 .vscode
 .env
 build
-puppeteer.config.json
+puppeteer.config
